@@ -78,7 +78,13 @@ boost::filesystem::path GetCacheFile(const std::string& device,
                                      bool is_kernel_str)
 {
     std::string filename = (is_kernel_str ? miopen::md5(name) : name) + ".o";
-    return GetCachePath() / miopen::md5(device + ":" + args) / filename;
+    //return GetCachePath() / miopen::md5(device + ":" + args) / filename;
+    boost::filesystem::path currPath = GetCachePath() /
+      miopen::md5(device + ":" + args) / filename;
+    std::cout << "Device: " << device << ", Cache File: "
+              << currPath.native() << std::endl
+              << std::flush; // ** TEMP: DEBUG ONLY
+    return currPath;
 }
 
 std::string LoadBinary(const std::string& device,
@@ -91,10 +97,12 @@ std::string LoadBinary(const std::string& device,
     auto f = GetCacheFile(device, name, args, is_kernel_str);
     if(boost::filesystem::exists(f))
     {
+        //std::cout << "Cache file: " << f.string() << std::endl << std::flush; // ** TEMP: DEBUG ONLY
         return f.string();
     }
     else
     {
+        std::cout << "Cache file does not exist\n" << std::flush; // ** TEMP: DEBUG ONLY
         return {};
     }
 }

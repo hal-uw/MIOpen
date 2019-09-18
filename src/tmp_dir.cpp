@@ -7,6 +7,7 @@ namespace miopen {
 void SystemCmd(std::string cmd)
 {
 // std::cout << cmd << std::endl;
+    std::cout << cmd << std::endl; // ** TEMP: DEBUG ONLY
 // We shouldn't call system commands
 #ifdef MIOPEN_USE_CLANG_TIDY
     (void)cmd;

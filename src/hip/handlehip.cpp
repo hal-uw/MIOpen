@@ -39,6 +39,9 @@
 #include <chrono>
 #include <thread>
 
+/* if defined, use hipMalloc/Memcpy/Free, else unified address space */
+//#define DGPU
+
 namespace miopen {
 
 // Get current context
@@ -64,21 +67,43 @@ std::size_t GetAvailableMemory()
 
 void* default_allocator(void*, size_t sz)
 {
+    void* result;
+#ifdef DGPU
     if(sz > GetAvailableMemory())
         MIOPEN_THROW("Memory not available to allocate buffer: " + std::to_string(sz));
-    void* result;
     auto status = hipMalloc(&result, sz);
+    //fprintf(stdout, "*** hipMalloc in MIOpen: result: %#lx, &: %#lx ***\n", result, &result); // ** TEMP: DEBUG ONLY
     if(status != hipSuccess)
     {
         status = hipHostMalloc(&result, sz);
+        fprintf(stdout, "*** hipHostMalloc in MIOpen: result: %%#lx, &: %#lx ***\n", result, &result); // ** TEMP: DEBUG ONLY
         if(status != hipSuccess)
             MIOPEN_THROW_HIP_STATUS(status,
                                     "Hip error creating buffer " + std::to_string(sz) + ": ");
     }
+#else // APU
+    if (posix_memalign(&result, 64, sz)) {
+      fprintf(stdout, "*** (Error) Cache-line aligned malloc in MIOpen default allocator: %#lx, &: %#lx ***\n", result, &result); // ** TEMP: DEBUG ONLY
+        MIOPEN_THROW("Error: posix_memalign failed creating buffer " + std::to_string(sz) + ": ");
+        free(result);
+        exit(-1);
+    } else {
+      fprintf(stdout, "*** Cache-line aligned malloc in MIOpen default allocator: %#lx, &: %#lx ***\n", result, &result); // ** TEMP: DEBUG ONLY
+    }
+#endif // #ifdef DGPU
     return result;
 }
 
-void default_deallocator(void*, void* mem) { hipFree(mem); }
+void default_deallocator(void*, void* mem) {
+    //fprintf(stdout, "*** hipFree in MIOpen: mem: %#lx, &: %#lx ***\n", mem, &mem); // ** TEMP: DEBUG ONLY
+#ifdef DGPU
+    hipFree(mem);
+#else // APU
+    if (mem) {
+        free(mem);
+    }
+#endif // #ifdef DGPU
+}
 
 int get_device_id() // Get random device
 {
@@ -220,25 +245,52 @@ Allocator::ManageDataPtr&
 Handle::WriteTo(const void* data, Allocator::ManageDataPtr& ddata, std::size_t sz)
 {
     this->Finish();
+    //fprintf(stdout, "*** hipMemcpy H2D in MIOpen ***\n"); // ** TEMP: DEBUG ONLY
+#ifdef DGPU
     auto status = hipMemcpy(ddata.get(), data, sz, hipMemcpyHostToDevice);
     if(status != hipSuccess)
         MIOPEN_THROW_HIP_STATUS(status, "Hip error writing to buffer: ");
+#else // APU
+    void * retPtr = memcpy(ddata.get(), data, sz);
+    if (retPtr == nullptr)
+    {
+        MIOPEN_THROW("Error writing to buffer: ");
+    }
+#endif // #ifdef DGPU
     return ddata;
 }
 void Handle::ReadTo(void* data, const Allocator::ManageDataPtr& ddata, std::size_t sz)
 {
     this->Finish();
+    //fprintf(stdout, "*** hipMemcpy D2H in MIOpen ***\n"); // ** TEMP: DEBUG ONLY
+#ifdef DGPU
     auto status = hipMemcpy(data, ddata.get(), sz, hipMemcpyDeviceToHost);
     if(status != hipSuccess)
         MIOPEN_THROW_HIP_STATUS(status, "Hip error reading from buffer: ");
+#else // APU
+    void * retPtr = memcpy(data, ddata.get(), sz);
+    if (retPtr == nullptr)
+    {
+        MIOPEN_THROW("Error reading from buffer: ");
+    }
+#endif // #ifdef DGPU
 }
 
 void Handle::Copy(ConstData_t src, Data_t dest, std::size_t size)
 {
     this->impl->set_ctx();
+    //fprintf(stdout, "*** hipMemcpy D2D in MIOpen ***\n"); // ** TEMP: DEBUG ONLY
+#ifdef DGPU
     auto status = hipMemcpy(dest, src, size, hipMemcpyDeviceToDevice);
     if(status != hipSuccess)
         MIOPEN_THROW_HIP_STATUS(status, "Hip error copying buffer: ");
+#else // APU
+    void * retPtr = memcpy(dest, src, size);
+    if (retPtr == nullptr)
+    {
+        MIOPEN_THROW("Error copying buffer: ");
+    }
+#endif // #ifdef DGPU
 }
 
 KernelInvoke Handle::GetKernel(const std::string& algorithm,

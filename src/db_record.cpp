@@ -314,7 +314,7 @@ bool DbRecord::Flush(const RecordPositions* const pos)
 
         if(!file)
         {
-            MIOPEN_LOG_E("File is unwritable.");
+            MIOPEN_LOG_E("File " + db_filename + " is unwritable.");
             return false;
         }
 
@@ -328,7 +328,7 @@ bool DbRecord::Flush(const RecordPositions* const pos)
 
         if(!from)
         {
-            MIOPEN_LOG_E("File is unreadable.");
+            MIOPEN_LOG_E("File " + db_filename + " is unreadable.");
             return false;
         }
 
@@ -336,7 +336,7 @@ bool DbRecord::Flush(const RecordPositions* const pos)
 
         if(!to)
         {
-            MIOPEN_LOG_E("Temp file is unwritable.");
+            MIOPEN_LOG_E("Temp file " + temp_name + " is unwritable.");
             return false;
         }
 
@@ -377,7 +377,7 @@ void DbRecord::ReadFile(RecordPositions* const pos)
 
     if(!file)
     {
-        MIOPEN_LOG_W("File is unreadable.");
+        MIOPEN_LOG_W("File " + db_filename + " is unreadable.");
         return;
     }
 
