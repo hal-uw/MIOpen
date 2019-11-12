@@ -304,6 +304,11 @@ if(miopengemm_FOUND)
     target_link_libraries( MIOpen PUBLIC miopengemm )
 endif()
 
+if(rocblas_FOUND)
+    target_link_libraries( MIOpen INTERFACE $<BUILD_INTERFACE:roc::rocblas> )
+    target_link_libraries( MIOpen PRIVATE roc::rocblas )
+endif()
+
 if(WIN32 AND NOT MSVC)
     if(BUILD_DEV)
         target_link_libraries(MIOpen PUBLIC -Wl,-export-all-symbols -Wl,-exclude-symbols=_Unwind_Resume)
