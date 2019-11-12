@@ -51,6 +51,26 @@ auto tien(T&& x) -> decltype(tie_impl(std::forward<T>(x), typename detail::gens<
     return tie_impl(std::forward<T>(x), typename detail::gens<N>::type{});
 }
 
+template <typename F, std::size_t... Ns>
+auto create_tuple_impl(F f, detail::seq<Ns...>) -> decltype(std::make_tuple(std::forward<decltype(f(Ns))>(f(Ns))...))
+{
+        return std::make_tuple(std::forward<decltype(f(Ns))>(f(Ns))...);
+}
+
+template <std::size_t N, typename F>
+auto create_tuple(F f) -> decltype(create_tuple_impl(f, typename detail::gens<N>::type{}))
+{
+        return create_tuple_impl(f, typename detail::gens<N>::type{});
+}
+
+inline std::size_t GetTypeSize(miopenDataType_t d)
+{
+    if(d == miopenFloat)
+        return 4;
+    else
+        return 1;
+}
+
 struct TensorDescriptor : miopenTensorDescriptor
 {
     TensorDescriptor();
@@ -61,7 +81,13 @@ struct TensorDescriptor : miopenTensorDescriptor
     TensorDescriptor(miopenDataType_t t, const int* plens, int size);
     TensorDescriptor(miopenDataType_t t, const int* plens, const int* pstrides, int size);
 
+    TensorDescriptor(miopenDataType_t t,
+                     std::vector<std::size_t> lens_in,
+                     std::vector<std::size_t> strides_in);
+
     void CalculateStrides();
+
+    bool IsPacked() const;
 
     const std::vector<std::size_t>& GetLengths() const;
     const std::vector<std::size_t>& GetStrides() const;
@@ -95,6 +121,8 @@ struct TensorDescriptor : miopenTensorDescriptor
     private:
     std::vector<std::size_t> lens;
     std::vector<std::size_t> strides;
+
+    bool packed;
 
     miopenDataType_t type = miopenFloat;
 };
