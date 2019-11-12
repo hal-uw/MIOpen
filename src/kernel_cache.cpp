@@ -117,6 +117,24 @@ Kernel KernelCache::GetKernel(const std::string& algorithm, const std::string& n
     }
 }
 
+const std::vector<Kernel>& KernelCache::GetKernels(const std::string& algorithm,
+                                                   const std::string& network_config)
+{
+    std::pair<std::string, std::string> key = std::make_pair(algorithm, network_config);
+
+    auto it = kernel_map.find(key);
+    if(it != kernel_map.end())
+    {
+        //MIOPEN_LOG_I2(it->second.size() << " kernels for key: " << key.first << " \"" << key.second
+          //                              << '\"');
+        //return it->second;
+    }
+
+    static const std::vector<Kernel> empty{};
+    MIOPEN_LOG_I2("0 kernels for key: " << key.first << " \"" << key.second << '\"');
+    return empty;
+}
+
 Kernel KernelCache::GetKernel(Handle& h,
                               const std::string& algorithm,
                               const std::string& network_config,
