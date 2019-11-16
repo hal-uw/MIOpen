@@ -2528,7 +2528,7 @@ void RNNDescriptor::RNNBackwardData(Handle& handle,
         {
             SetTensor(handle, hx_desc, dhx, &beta);
             // Update time
-            profileRNNkernels(handle, 1, ctime);
+            //profileRNNkernels(handle, 1, ctime);
         }
         if(rnnMode == miopenLSTM && dcx != nullptr)
         {
