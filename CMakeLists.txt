@@ -145,6 +145,16 @@ else()
     set(MIOPEN_USE_MIOPENGEMM 0)
 endif()
 
+# rocblas
+find_package(rocblas PATHS /opt/rocm)
+if(rocblas_FOUND)
+    message(STATUS "Build with rocblas")
+    set(MIOPEN_USE_ROCBLAS 1)
+else()
+    message(STATUS "Build without rocblas")
+    set(MIOPEN_USE_ROCBLAS 0)
+endif()
+
 find_package(OpenSSL REQUIRED)
 set(BOOST_COMPONENTS filesystem system)
 add_definitions(-DBOOST_ALL_NO_LIB=1)
@@ -271,6 +281,7 @@ enable_cppcheck(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/include
     DEFINE
         MIOPEN_USE_MIOPENGEMM=1
+        MIOPEN_USE_ROCBLAS=1
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)

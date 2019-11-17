@@ -36,9 +36,18 @@
 #include <miopen/allocator.hpp>
 #include <vector>
 
+#if MIOPEN_USE_ROCBLAS
+#include <miopen/manage_ptr.hpp>
+#include <rocblas.h>
+#endif
+
 namespace miopen {
 
 struct HandleImpl;
+
+#if MIOPEN_USE_ROCBLAS
+using rocblas_handle_ptr = MIOPEN_MANAGE_PTR(rocblas_handle, rocblas_destroy_handle);
+#endif
 
 struct Handle : miopenHandle
 {
@@ -116,6 +125,11 @@ struct Handle : miopenHandle
         this->ReadTo(result.data(), ddata, sz * sizeof(T));
         return result;
     }
+
+#if MIOPEN_USE_ROCBLAS
+    rocblas_handle_ptr CreateRocblasHandle() const;
+    rocblas_handle_ptr rhandle;
+#endif
 
     std::unique_ptr<HandleImpl> impl;
 };

@@ -83,6 +83,9 @@ class KernelCache
 
     Kernel GetKernel(const std::string& algorithm, const std::string& network_config);
 
+    const std::vector<Kernel>& GetKernels(const std::string& algorithm,
+                                          const std::string& network_config);
+
     KernelCache();
 
     private:
