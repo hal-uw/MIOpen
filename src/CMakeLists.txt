@@ -279,9 +279,14 @@ endif()
 if(miopengemm_FOUND)
     list(APPEND MIOpen_Source
         gemm.cpp
-        gemm_v2.cpp
         miopengemm.cpp
         gemm_geometry.cpp
+    )
+endif()
+
+if(miopengemm_FOUND OR rocblas_FOUND)
+    list(APPEND MIOpen_Source
+        gemm_v2.cpp
     )
 endif()
 
@@ -301,6 +306,11 @@ if( MIOPEN_BACKEND STREQUAL "HIPOC" OR MIOPEN_BACKEND STREQUAL "HIP")
         hipoc/hipoc_kernel.cpp
         hipoc/hipoc_program.cpp
         )
+    set_source_files_properties(
+        hipoc/hipoc_kernel.cpp hipoc/hipoc_program.cpp
+        PROPERTIES COMPILE_FLAGS
+        "-hc")
+        #"-std=c++amp -fPIC -gline-tables-only -hc")
 endif()
 
 if( MIOPEN_BACKEND MATCHES "OpenCL" OR MIOPEN_BACKEND STREQUAL "HIPOC" OR MIOPEN_BACKEND STREQUAL "HIP")
@@ -363,7 +373,7 @@ if( MIOPEN_BACKEND STREQUAL "OpenCL")
     list(APPEND PACKAGE_DEPENDS PACKAGE OpenCL)
     set(BACKEND_PACKAGE "OpenCL")
 elseif(MIOPEN_BACKEND STREQUAL "HIPOC" OR MIOPEN_BACKEND STREQUAL "HIP")
-    target_link_libraries( MIOpen PRIVATE hip::hip_hcc hip::device )
+    target_link_libraries( MIOpen PRIVATE hip::hip_hcc ${hcc_LIBRARIES} )
     target_link_libraries( MIOpen INTERFACE hip::hip_hcc )
     if(ENABLE_HIP_WORKAROUNDS)
         # Workaround hip not setting its usage requirements correctly

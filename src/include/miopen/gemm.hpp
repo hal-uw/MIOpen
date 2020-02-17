@@ -29,6 +29,7 @@
 #include <miopen/gemm_geometry.hpp>
 #include <miopen/tensor.hpp>
 
+#if MIOPEN_USE_MIOPENGEMM
 namespace miopen {
 
 GemmGeometry
@@ -130,5 +131,6 @@ void RunGemmGeometryRNN(Handle& handle,
                         std::string& network_config,
                         float timeout);
 } // namespace miopen
+#endif //MIOPEN_USE_MIOPENGEMM
 
 #endif // GUARD_MIOPEN_GEMM_HPP_
