@@ -32,7 +32,7 @@
 #include <miopen/legacy_exhaustive_search.hpp>
 #include <miopen/mlo_utils.hpp>
 #include <miopen/solver.hpp>
-
+#include <chrono>
 #include <half.hpp>
 
 #ifdef max
@@ -214,7 +214,10 @@ static int MeasurePerfConfig(Handle* profile_h,
 
             params.GetStream().Finish();
 
-            s = miopen_mach_absolute_time();
+            //s = miopen_mach_absolute_time();
+            // gem5 needs deterministic timer instead, this timer is
+            // implemented and is a user space call
+            auto kernelStart = std::chrono::steady_clock::now();
 
             if(params.bias)
             {
@@ -226,9 +229,11 @@ static int MeasurePerfConfig(Handle* profile_h,
             }
 
             params.GetStream().Finish();
-            e = miopen_mach_absolute_time();
-
-            processing_time = subtractTimes(e, s);
+            //e = miopen_mach_absolute_time();
+            //processing_time = subtractTimes(e, s);
+            auto kernelStop = std::chrono::steady_clock::now();
+            std::chrono::duration<double> kernelTime = (kernelStop - kernelStart);
+            processing_time = kernelTime.count();
         }
     }
     catch(miopen::Exception& ex)

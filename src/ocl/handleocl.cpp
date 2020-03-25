@@ -523,7 +523,6 @@ Program Handle::LoadProgram(const std::string& program_name, std::string params,
         miopen::LoadBinary(this->GetDeviceName(), program_name, params, is_kernel_str);
     if(cache_file.empty())
     {
-        std::cout << "handleocl LoadProgram" << std::endl;
         auto p = miopen::LoadProgram(miopen::GetContext(this->GetStream()),
                                      miopen::GetDevice(this->GetStream()),
                                      program_name,
