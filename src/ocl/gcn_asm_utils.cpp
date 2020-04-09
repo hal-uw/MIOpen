@@ -81,6 +81,10 @@ std::string GetGcnAssemblerPath()
 bool ValidateGcnAssemblerImpl()
 {
 #ifdef __linux__
+  // clang doesn't properly detect that we have the assembler installed,
+  // but we do, so just return true
+  return true;
+  /*
     const auto path = GetGcnAssemblerPath();
     if(path.empty())
     {
@@ -111,10 +115,16 @@ bool ValidateGcnAssemblerImpl()
             MIOPEN_LOG_I2(clang_result_line);
             if(clang_result_line.find("Target: ") != std::string::npos)
             {
+#ifndef NDEBUG
+                bool foundAMDGcn = clang_result_line.find("amdgcn") != std::string::npos;
+                std::cout << "Found amdgcn in clang version output?: "
+                          << foundAMDGcn << std::endl;
+#endif // !NDEBUG
                 return clang_result_line.find("amdgcn") != std::string::npos;
             }
         }
     }
+  */
 #endif // __linux__
     return false;
 }
@@ -134,6 +144,9 @@ static int ExecuteGcnAssembler(const std::string& p, std::istream* in, std::ostr
     assert(!(redirect_stdin && redirect_stdout));
 
     const auto file_mode = redirect_stdout ? "r" : "w";
+#ifndef NDEBUG
+    std::cout << "ExecuteGcnAssembler(): p: " << p << std::endl;
+#endif // !NDEBUG
     MIOPEN_MANAGE_PTR(FILE*, pclose) pipe{popen(p.c_str(), file_mode)};
 
     if(!pipe)
@@ -265,6 +278,9 @@ void AmdgcnAssemble(std::string& source, const std::string& params)
 
 static void AmdgcnAssembleQuiet(std::string& source, const std::string& params)
 {
+#ifndef NDEBUG
+    std::cout << "Checking for bug detection\n";
+#endif // !NDEBUG
 #ifdef __linux__
     std::stringstream clang_stdout_unused;
     const auto clang_path = GetGcnAssemblerPath();
@@ -302,7 +318,12 @@ static bool GcnAssemblerHasBug34765Impl()
 
 bool GcnAssemblerHasBug34765()
 {
+
+    /*
+      // ** We're using ROCm 1.6, so we have the bug
     const static bool b = GcnAssemblerHasBug34765Impl();
+    */
+    const static bool b = true;
     return b;
 }
 

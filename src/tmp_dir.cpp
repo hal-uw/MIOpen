@@ -9,11 +9,15 @@ void SystemCmd(std::string cmd)
 {
 #ifndef NDEBUG
     MIOPEN_LOG_I(cmd);
+    std::cout << cmd << std::endl;
 #endif
 // We shouldn't call system commands
 #ifdef MIOPEN_USE_CLANG_TIDY
     (void)cmd;
 #else
+    if(std::system(0) != 0)
+        MIOPEN_THROW("No command processor");
+    std::cout << "Test" << std::endl;
     if(std::system(cmd.c_str()) != 0)
         MIOPEN_THROW("Can't execute " + cmd);
 #endif

@@ -74,7 +74,7 @@ miopenStatus_t CallGemm(Handle& handle,
                         Data_t C,
                         int c_offset,
                         std::string* kcache_key,
-                        bool enqueue_dummy_kernel,
+                        bool enqueue_dummy_kernel = false,
                         GemmBackend_t gemm_backend = GemmBackend_t::rocblas);
 
 miopenStatus_t CallGemmStridedBatched(Handle& handle,
@@ -86,7 +86,7 @@ miopenStatus_t CallGemmStridedBatched(Handle& handle,
                                       Data_t C,
                                       int c_offset,
                                       std::string* kcache_key,
-                                      bool enqueue_dummy_kernel,
+                                      bool enqueue_dummy_kernel = false,
                                       GemmBackend_t gemm_backend = GemmBackend_t::rocblas);
 
 miopenStatus_t
@@ -99,7 +99,7 @@ CallGemmStridedBatchedSequential(Handle& handle,
                                  Data_t C,
                                  int c_offset,
                                  std::string* kcache_key,
-                                 bool enqueue_dummy_kernel,
+                                 bool enqueue_dummy_kernel = false,
                                  GemmBackend_t gemm_backend = GemmBackend_t::rocblas);
 
 // GEMM parameters for Convolution (using Im2Col) Fwd

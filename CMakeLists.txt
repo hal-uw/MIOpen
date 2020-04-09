@@ -117,14 +117,15 @@ if( MIOPEN_BACKEND STREQUAL "HIP" OR MIOPEN_BACKEND STREQUAL "HIPOC")
     else()
         message(FATAL_ERROR "clang-ocl not found")
     endif()
-    find_package(hip REQUIRED)
+    find_package(hip REQUIRED PATHS /opt/rocm)
     link_libraries(stdc++)
 
     # A hack to make this work without the device enumerator
-    link_libraries(-amdgpu-target=gfx803 -amdgpu-target=gfx900 -Wno-unused-command-line-argument)
-    CHECK_CXX_COMPILER_FLAG(-amdgpu-target=gfx906 -Werror, GFX_906_FLAG_VALID)
-    if(GFX_906_FLAG_VALID)
-        link_libraries(-amdgpu-target=gfx906)
+    link_libraries(-amdgpu-target=gfx801 -Wno-unused-command-line-argument)
+    #link_libraries(-amdgpu-target=gfx803 -amdgpu-target=gfx900 -Wno-unused-command-line-argument)
+    CHECK_CXX_COMPILER_FLAG(-amdgpu-target=gfx801 -Werror, GFX_801_FLAG_VALID)
+    if(GFX_801_FLAG_VALID)
+        link_libraries(-amdgpu-target=gfx801)
     endif()
     # end hack
 
@@ -150,6 +151,7 @@ message(STATUS "AMDGCN assembler: ${MIOPEN_AMDGCN_ASSEMBLER}")
 
 # miopengemm
 find_package(miopengemm PATHS /opt/rocm)
+set(miopengemm_FOUND 0)
 if(miopengemm_FOUND)
     message(STATUS "Build with miopengemm")
     set(MIOPEN_USE_MIOPENGEMM 1)
@@ -162,7 +164,7 @@ set(BOOST_COMPONENTS filesystem system)
 add_definitions(-DBOOST_ALL_NO_LIB=1)
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
-find_path(HALF_INCLUDE_DIR half.hpp)
+find_path(HALF_INCLUDE_DIR half.hpp /half/include)
 
 option( BUILD_SHARED_LIBS "Build as a shared library" ON )
 
