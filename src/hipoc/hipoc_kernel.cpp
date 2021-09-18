@@ -56,8 +56,9 @@ void HIPOCKernelInvoke::run(void* args, std::size_t size) const
         stop  = make_hip_event();
     }
 
-    // std::cerr << "Launch kernel: " << name << std::endl;
-
+#ifndef NDEBUG
+    std::cout << "Launch kernel: " << name << std::endl << std::flush;
+#endif // !NDEBUG
     MIOPEN_HANDLE_LOCK
 
     auto status = hipHccModuleLaunchKernel(fun,

@@ -34,8 +34,8 @@
 #include <miopen/check_numerics.hpp>
 
 #if MIOPEN_USE_GEMM
-#include <miopen/gemm.hpp>
 #include <miopen/gemm_v2.hpp>
+#include <miopen/gemm.hpp>
 #endif
 
 namespace miopen {
