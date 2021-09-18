@@ -173,7 +173,7 @@ class Driver
         miopenCreate(&handle);
 #elif MIOPEN_BACKEND_HIP
         hipStream_t s;
-        hipStreamCreate(&s);
+        hipStreamCreate(&s, -1);
         miopenCreateWithStream(&handle, s);
 #endif
 

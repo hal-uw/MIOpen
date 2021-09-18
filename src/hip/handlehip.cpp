@@ -164,7 +164,7 @@ struct HandleImpl
     StreamPtr create_stream()
     {
         hipStream_t result;
-        auto status = hipStreamCreate(&result);
+        auto status = hipStreamCreate(&result, -1);
         if(status != hipSuccess)
             MIOPEN_THROW_HIP_STATUS(status, "Failed to allocate stream");
         return StreamPtr{result, &hipStreamDestroy};
