@@ -34,7 +34,7 @@
 // Disable specific warnings
 #define MIO_RNN_DEBUG 0
 
-#define MIOPEN_RNN_SYNCH /*0*/ 1
+#define MIOPEN_RNN_SYNCH 0
 #define MIO_RNN_CPP_PROF 0
 
 namespace miopen {
